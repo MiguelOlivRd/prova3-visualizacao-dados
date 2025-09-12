@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Relação entre tempo de viagem e atraso — ECharts</title>
+<style>
+    body { font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; margin: 12px; }
+    #chart { width:100%; height:450px;}
+    #title {text-align: center; margin-top: 30px; font-weight:300; font-size:x-large; position:relative; color: rgb(115, 115, 117);}
+    #stationFilters { display:none; margin-top:10px; text-align:center;}
+    select {
+        border: 2px solid #dddddd;
+        background: #eeeeee;
+        padding:6px 10px;
+        transition: 0.4s;
+        }
+
+        select:hover,
+        select:focus {
+        background: #dddddd;
+    }
+    select,
+        ::picker(select) {
+        appearance: base-select;
+        border: none;
+    }
+    option {
+        font-size: small;
+        display: flex;
+        justify-content: flex-start;
+        gap: 20px;
+        background: #eeeeee;
+        padding: 10px;
+        transition: 0.4s;
+    }
+    option:first-of-type {
+    border-radius: 8px 8px 0 0;
+    }
+
+    option:last-of-type {
+    border-radius: 0 0 8px 8px;
+    }
+
+    option:not(option:last-of-type) {
+    border-bottom: none;
+    }
+    option:nth-of-type(odd) {
+    background: white;
+    }
+
+    option:hover,
+    option:focus {
+    background: rgb(117, 181, 255);
+    color: white;
+    }
+  #radar { width:100%; height:500px; transition: opacity 0.5s; margin-top: 0; }
+  #applyBtn { margin-left:6px; vertical-align: middle; font-weight: 700; color: rgb(115, 115, 117); cursor: pointer; border: none; height: 40px; width: 40px; border-radius: 100%; background: #eeeeee; padding:0 10px; transition: 0.4s;}
+  #applyBtn:hover{ background: #dddddd; }
+  #titleSpan {cursor:pointer; color: rgb(117, 181, 255); border: 1px dashed rgb(117, 181, 255); border-radius: 6px; padding: 4px;}
+  #overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:white; opacity:0; pointer-events:none; transition:opacity 0.5s; }
+  #backBtn {
+    display: block;
+    margin: 0 auto;
+    font-size: 16px;
+    background-color: #eeeeee;
+    border: 2px solid #dddddd;
+    color: rgb(115, 115, 117);
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 12px 20px;
+    transition: background-color 0.3s ease;
+}#backBtn:hover { background: #dddddd; }
+  #radarTitle { text-align:center; margin-top:30px; font-weight:300; font-size:x-large;color: rgb(115, 115, 117); }
+  #radarSubtitle { text-align:center; margin-bottom:10px; margin-top:10px; font-weight:300; font-size:medium;color: rgb(115, 115, 117);}
+  .paragraph {margin: 8px 0;}
+  .blueText {color: rgb(117, 181, 255);}
+  #legend{text-align: center; margin-top: 20px; color: rgb(115, 115, 117)}
+  .peakHighlight{color: #d73027;}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+</head>
+<body>
+
+<div id="title">
+    Relação entre o tempo de viagem e o tempo de atraso em viagens de trem 
+    <p class="paragraph"><span id="titleSpan">do Reino Unido</span> 
+        <div id="stationFilters">
+            <label>de</label>
+            <select id="fromSelect"><option value="">qualquer estação</option></select>
+            <label>para</label>
+            <select id="toSelect"><option value="">qualquer estação</option></select>
+            <button id="applyBtn">OK</button>
+        </div>
+    <p class="paragraph">entre Janeiro e Abril de 2024</p></p> 
+</div>
+
+<div id="chart"></div>
+<div id="legend">
+  *Os horários de pico considerados foram pela manhã, entre as <span class="peakHighlight">06h e 08h</span>, e pela tarde, entre as <span class="peakHighlight">14h e 16h</span>, horários com mais movimento em todos os meses analisados.
+</div>
+
+<div id="overlay">
+  <div id="radarTitle"></div>
+  <div id="radarSubtitle"></div>
+  <div id="radar"></div>
+  <button id="backBtn">Voltar</button>
+</div>
+
+<script>
+const chartDom = document.getElementById('chart');
+const chart = echarts.init(chartDom);
+const radarDom = document.getElementById('radar');
+const radarChart = echarts.init(radarDom);
+const overlay = document.getElementById('overlay');
+const backBtn = document.getElementById('backBtn');
+const radarTitle = document.getElementById('radarTitle');
+const radarSubtitle = document.getElementById('radarSubtitle');
+
+let allData = [];
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const header = lines[0].split(',').map(h=>h.trim());
+  return lines.slice(1).map(l=>{
+    const cols = l.match(/(?:\"[^\"]*\"|[^,])+/g) || l.split(',');
+    const obj = {};
+    header.forEach((h,i)=>{ obj[h] = (cols[i] || '').replace(/^\"|\"$/g,'').trim(); });
+    return obj;
+  });
+}
+
+function toNumberSafe(v){ const n = Number(v); return isNaN(n) ? null : n; }
+
+function computePeakScore(depTimeStr){
+  const parts = (depTimeStr||'00:00').split(':');
+  const h = Number(parts[0]);
+  const m = parts[1] ? Number(parts[1]) : 0;
+  const minutes = h*60 + m;
+  const peaks = [[360,480],[960,1080]];
+  let minDist = Infinity;
+  for(const [a,b] of peaks){
+    if(minutes >= a && minutes <= b){ minDist = 0; break; }
+    const dist = Math.min(Math.abs(minutes - a), Math.abs(minutes - b));
+    if(dist < minDist) minDist = dist;
+  }
+  const cutoff = 120;
+  return Math.max(0, (cutoff - minDist)/cutoff);
+}
+
+function loadAndRender(){
+  fetch('viagens_atrasadas.csv')
+    .then(r=>r.text())
+    .then(text=>{
+      allData = parseCSV(text).map(r=>{
+        return {
+          ATRASO: toNumberSafe(r.ATRASO),
+          TEMPO: toNumberSafe(r.TEMPO_ESPERADO_DA_VIAGEM),
+          PASSAGEIROS: toNumberSafe(r.QTD_PASSAGEIROS),
+          ESTACAO_IDA: r.ESTACAO_IDA,
+          ESTACAO_CHEGADA: r.ESTACAO_CHEGADA,
+          DATA_VIAGEM: r.DATA_VIAGEM,
+          HORARIO_SAIDA: r.HORARIO_SAIDA,
+          HORARIO_CHEGADA: r.HORARIO_CHEGADA,
+          PCT_PRIMEIRA_CLASSE: toNumberSafe(r.PCT_PRIMEIRA_CLASSE),
+          PCT_COMPRAS_ANTECIPADAS: toNumberSafe(r.PCT_COMPRAS_ANTECIPADAS),
+          PRECO_MEDIO: toNumberSafe(r.PRECO_MEDIO),
+          PCT_PEDIDOS_REEMBOLSO: toNumberSafe(r.PCT_PEDIDOS_REEMBOLSO),
+          peakScore: computePeakScore(r.HORARIO_SAIDA),
+          MOTIVO_ATRASO: r.MOTIVO_ATRASO,
+        }
+      });
+
+      populateStationSelects();
+      renderScatter(allData);
+    })
+    .catch(e=>{ console.error(e); alert('Erro ao carregar viagens_atrasadas.csv'); });
+}
+
+function populateStationSelects(){
+  const fromSel = document.getElementById('fromSelect');
+  const toSel = document.getElementById('toSelect');
+  const froms = Array.from(new Set(allData.map(d=>d.ESTACAO_IDA))).sort();
+  const tos = Array.from(new Set(allData.map(d=>d.ESTACAO_CHEGADA))).sort();
+  froms.forEach(s=>{ const o = document.createElement('option'); o.value=s; o.textContent=s; fromSel.appendChild(o); });
+  tos.forEach(s=>{ const o = document.createElement('option'); o.value=s; o.textContent=s; toSel.appendChild(o); });
+}
+
+function renderScatter(data){
+  const scatterData = data.map(d => [d.ATRASO, d.TEMPO, d.peakScore, d.PASSAGEIROS, d]);
+
+  chart.setOption({
+    tooltip: {
+      trigger: 'item',
+      formatter: p => {
+        const d = p.data[4];
+        const dateObj = new Date(d.DATA_VIAGEM);
+        const formatter = new Intl.DateTimeFormat('pt-BR',{day:'numeric', month:'long', year:'numeric'});
+        return `${d.ESTACAO_IDA} -> ${d.ESTACAO_CHEGADA}, em ${formatter.format(dateObj)}<br>
+                A viagem chegou com ${d.ATRASO} minuto${d.ATRASO === 1 ? '': 's'} de atraso`;
+      }
+    },
+    grid: { left:50, right:160, bottom:80, containLabel:true },
+    xAxis: { name: 'Tempo de atraso (min)', type: 'value' },
+    yAxis: { name: 'Tempo da viagem (min)', type: 'value' },
+    dataZoom: [
+      { type: 'inside', xAxisIndex: 0 },
+      { type: 'inside', yAxisIndex: 0 },
+      { show: true, xAxisIndex: 0, type: 'slider', bottom: 10 },
+      { show: true, yAxisIndex: 0, type: 'slider', right: 10, bottom: 120, top: 70 }
+    ],
+    visualMap: [{
+      type: 'continuous',
+      min: 0, max: 1,
+      dimension: 2,
+      inRange: { color: ['#2b83ba', '#fdae61', '#d73027'] },
+      text: ['Próximo ao pico','Longe do pico'],
+      right: 45, top: 110,
+      calculable: true,
+    }],
+    series: [{
+      type: 'scatter',
+      symbolSize: 8,
+      encode: { x:0, y:1 },
+      data: scatterData
+    }]
+  });
+}
+
+// --- Título com selects ---
+const titleSpan = document.getElementById('titleSpan');
+const filtersDiv = document.getElementById('stationFilters');
+
+titleSpan.addEventListener('click', () => { titleSpan.style.display='none'; filtersDiv.style.display='block'; });
+
+document.getElementById('applyBtn').addEventListener('click', () => {
+  const from = document.getElementById('fromSelect').value;
+  const to = document.getElementById('toSelect').value;
+  if(from && to) titleSpan.textContent=`da estação ${from} para a estação ${to}`;
+  else if(from) titleSpan.textContent=`da estação ${from} para qualquer estação`;
+  else if(to) titleSpan.textContent=`de qualquer estação para a estação ${to}`;
+  else titleSpan.textContent='do Reino Unido';
+  filtersDiv.style.display='none'; titleSpan.style.display='inline';
+  applyFilters();
+});
+
+function applyFilters(){
+  const from = document.getElementById('fromSelect').value;
+  const to = document.getElementById('toSelect').value;
+  let filtered = allData;
+  if(from) filtered = filtered.filter(d=>d.ESTACAO_IDA===from);
+  if(to) filtered = filtered.filter(d=>d.ESTACAO_CHEGADA===to);
+  renderScatter(filtered);
+}
+
+loadAndRender();
+window.addEventListener('resize', ()=> chart.resize());
+window.addEventListener('resize', ()=> radarChart.resize());
+
+// --- cor baseada no peakScore ---
+function getRadarColor(peakScore) {
+    // mesmo gradiente do scatterplot: 0 = azul (#2b83ba), 0.5 = laranja (#fdae61), 1 = vermelho (#d73027)
+    if (peakScore <= 0.5) {
+        // interpolação azul -> laranja
+        const t = peakScore / 0.5;
+        return interpolateColor('#2b83ba', '#fdae61', t);
+    } else {
+        // interpolação laranja -> vermelho
+        const t = (peakScore - 0.5) / 0.5;
+        return interpolateColor('#fdae61', '#d73027', t);
+    }
+}
+
+// função de interpolação de cor simples (hex para rgb e interpolação linear)
+function interpolateColor(c1, c2, t) {
+    const hexToRgb = h => h.match(/\w\w/g).map(x => parseInt(x,16));
+    const [r1,g1,b1] = hexToRgb(c1.slice(1));
+    const [r2,g2,b2] = hexToRgb(c2.slice(1));
+    const r = Math.round(r1 + (r2-r1)*t);
+    const g = Math.round(g1 + (g2-g1)*t);
+    const b = Math.round(b1 + (b2-b1)*t);
+    return `rgb(${r},${g},${b})`;
+}
+
+  
+function formatDatePtBr(dateStr) {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('pt-BR', { day:'numeric', month:'long', year:'numeric' });
+}
+
+function formatTimePtBr(timeStr) {
+    if (!timeStr) return '';
+    const [h,m] = timeStr.split(':').map(Number);
+    return m === 0 ? `${h}h` : `${h}h${m}m`;
+}
+
+function mapearMotivo(motivo) {
+    if (!motivo || motivo.trim() === '') return 'motivos desconhecidos';
+
+    const mapa = {
+        "Signal Failure": "uma falha no sinal",
+        "Staff Shortage": "falta de pessoal",
+        "Staffing": "problemas de equipe",
+        "Technical Issue": "um problema técnico",
+        "Traffic": "tráfego intenso",
+        "Weather": "condições climáticas adversas",
+        "Weather Conditions": "condições climáticas adversas"
+    };
+
+    return mapa[motivo] || "motivos desconhecidos";
+}
+
+// --- Radar ---
+chart.on('click', params => {
+  const d = params.data[4]; // viagem clicada
+
+  overlay.style.pointerEvents='auto';
+  overlay.style.opacity=1;
+
+// Ao clicar em um ponto do scatterplot:
+radarTitle.innerHTML = `Condições da viagem de <span class="blueText">${d.ESTACAO_IDA} -> ${d.ESTACAO_CHEGADA}</span> em ${formatDatePtBr(d.DATA_VIAGEM)}`;
+radarSubtitle.innerHTML = `A viagem começou às ${formatTimePtBr(d.HORARIO_SAIDA)} e era prevista para chegar às ${formatTimePtBr(d.HORARIO_CHEGADA)}, mas atrasou ${d.ATRASO} minuto${d.ATRASO===1?'':'s'} por ${mapearMotivo(d.MOTIVO_ATRASO)}.`;
+
+  // --- Calcular pontualidade (%) ---
+const tempoReal = d.TEMPO + d.ATRASO;
+const pontualidade = tempoReal > 0 ? (d.TEMPO / tempoReal) * 100 : 0;
+const tempoViagem = d.TEMPO || 0;
+
+const color = getRadarColor(d.peakScore);
+
+radarChart.setOption({
+  tooltip: {
+    formatter: function(params) {
+      const v = params.data.value;
+      return `
+        <b>Perfil da viagem</b> <br><br>
+        Pontualidade: <b>${v[0]}%</b><br>
+        Tempo de viagem: <b>${v[1]} min</b><br>
+        Primeira classe: <b>${v[2]}%</b><br>
+        Compras antecipadas: <b>${v[3]}%</b><br>
+        Pedidos de reembolso: <b>${v[4]}%</b><br>
+        Preço médio: <b>£${v[5]}</b>
+      `;
+    }
+  },
+  radar: {
+    indicator: [
+      { name: 'Pontualidade (%)', max: 100 },
+      { name: 'Tempo de viagem (min)', max: 300 },
+      { name: 'Primeira classe (%)', max: 100 },
+      { name: 'Compras antecipadas (%)', max: 100 },
+      { name: 'Pedidos reembolso (%)', max: 100 },
+      { name: 'Preço médio (£)', max: 200 },
+    ]
+  },
+  series: [{
+    type: 'radar',
+    data: [{
+        value: [
+            Number(pontualidade.toFixed(1)),
+            Number((tempoReal).toFixed(1)),
+            Number(d.PCT_PRIMEIRA_CLASSE.toFixed(1)),
+            Number(d.PCT_COMPRAS_ANTECIPADAS.toFixed(1)),
+            Number(d.PCT_PEDIDOS_REEMBOLSO.toFixed(1)),
+            Number(d.PRECO_MEDIO.toFixed(1)),
+        ],
+        name: 'Viagem selecionada',
+        lineStyle: { color: color },
+        itemStyle: { color: color }
+    }]
+  }]
+});
+});
+
+backBtn.addEventListener('click', ()=>{
+  overlay.style.opacity=0;
+  overlay.style.pointerEvents='none';
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+Visualização geral:
+
+Título: Relação entre o tempo de viagem e o tempo de atraso em viagens de trem do Reino Unido
+
+Eixo Y: Tempo da viagem
+Eixo X: Tempo do atraso
+Ponto: Viagem
+Cor: Vermelho, se foi uma viagem em horário de pico ou azul, se foi uma viagem fora do horário de pico
+Tooltip: "Viagem de X -> Y em XX/XX/XXXX. Clique para ver mais detalhes"
+Datazoom nos dois eixos.
+
+Visualização específica:
+
+Título: Condições da viagem de X -> Y em XX/XX/XXXX
+Subtítulo: A viagem começou às XX:XX e era prevista para chegar às XX:XX, mas atrasou X minutos.
+
+Pontos no radar:
+- preço do ticket médio (min: 0, max: maior preço registrado no dataset)
+- porcentagem de passageiros 1ª classe (min: 0%, max: 100%)
+- pontualidade (min: durou o dobro do tempo, max: 0 minutos de atraso)
+- tempo da viagem (min: 0, max: viagem mais longa do dataset)
+- porcentagem de pedidos de reembolso (min: 0, max: 100%)
+- porcentagem de tickets comprados antecipadamente (ou na hora, não sei o que fica mais legal) (min: 0%, max: 100%)
