@@ -116,6 +116,8 @@ const backBtn = document.getElementById('backBtn');
 const radarTitle = document.getElementById('radarTitle');
 const radarSubtitle = document.getElementById('radarSubtitle');
 
+
+
 let allData = [];
 
 function parseCSV(text) {
@@ -180,9 +182,37 @@ function populateStationSelects(){
   const fromSel = document.getElementById('fromSelect');
   const toSel = document.getElementById('toSelect');
   const froms = Array.from(new Set(allData.map(d=>d.ESTACAO_IDA))).sort();
+
+  // let avaialbreToStations = adjacencies[fromSel.value] || [];
   const tos = Array.from(new Set(allData.map(d=>d.ESTACAO_CHEGADA))).sort();
-  froms.forEach(s=>{ const o = document.createElement('option'); o.value=s; o.textContent=s; fromSel.appendChild(o); });
-  tos.forEach(s=>{ const o = document.createElement('option'); o.value=s; o.textContent=s; toSel.appendChild(o); });
+  froms.forEach(s=>{ 
+    const o = document.createElement('option'); 
+    o.value=s; 
+    o.textContent=s;
+    o.onclick = updateToStations; 
+    fromSel.appendChild(o); });
+  // tos.forEach(s=>{ const o = document.createElement('option'); o.value=s; o.textContent=s;  availableToStations.includes(s) ? toSel.appendChild(o) : null; });
+}
+
+async function updateToStations(){
+  let adjacencies = {};
+  await fetch('./adjacencies.json')
+    .then(r => r.json())
+    .then(data => {
+      adjacencies = data;
+    })
+    .catch(e => { console.error('Erro ao carregar adjacencies.json', e); });
+
+  const fromSel = document.getElementById('fromSelect');
+  const toSel = document.getElementById('toSelect');
+  const availableToStations = adjacencies[fromSel.value] || [];
+  toSel.innerHTML = '<option value="">qualquer estaçaaoão</option>';
+  const tos = Array.from(new Set(availableToStations.sort()));
+  tos.forEach(s=>{ 
+    const o = document.createElement('option'); 
+    o.value=s; 
+    o.textContent=s;
+    availableToStations.includes(s) ? toSel.appendChild(o) : null; });
 }
 
 function renderScatter(data){
