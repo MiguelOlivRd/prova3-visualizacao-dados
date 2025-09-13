@@ -183,7 +183,6 @@ function populateStationSelects(){
   const toSel = document.getElementById('toSelect');
   const froms = Array.from(new Set(allData.map(d=>d.ESTACAO_IDA))).sort();
 
-  // let avaialbreToStations = adjacencies[fromSel.value] || [];
   const tos = Array.from(new Set(allData.map(d=>d.ESTACAO_CHEGADA))).sort();
   froms.forEach(s=>{ 
     const o = document.createElement('option'); 
@@ -191,7 +190,7 @@ function populateStationSelects(){
     o.textContent=s;
     o.onclick = updateToStations; 
     fromSel.appendChild(o); });
-  // tos.forEach(s=>{ const o = document.createElement('option'); o.value=s; o.textContent=s;  availableToStations.includes(s) ? toSel.appendChild(o) : null; });
+  
 }
 
 async function updateToStations(){
@@ -216,7 +215,16 @@ async function updateToStations(){
 }
 
 function renderScatter(data){
-  const scatterData = data.map(d => [d.ATRASO, d.TEMPO, d.peakScore, d.PASSAGEIROS, d]);
+  const scatterData = data.map(d => {
+    const x = new Date(d.DATA_VIAGEM).getTime();
+
+    const timeParts = (d.HORARIO_SAIDA || "00:00").split(':');
+    const y = Number(timeParts[0])*60 + Number(timeParts[1]);
+
+    return [x, y, d.ATRASO, d.PASSAGEIROS, d];
+  });
+
+  const atrasoMax = Math.max(...data.map(d => d.ATRASO || 0));
 
   chart.setOption({
     tooltip: {
@@ -226,12 +234,28 @@ function renderScatter(data){
         const dateObj = new Date(d.DATA_VIAGEM);
         const formatter = new Intl.DateTimeFormat('pt-BR',{day:'numeric', month:'long', year:'numeric'});
         return `${d.ESTACAO_IDA} -> ${d.ESTACAO_CHEGADA}, em ${formatter.format(dateObj)}<br>
-                A viagem chegou com ${d.ATRASO} minuto${d.ATRASO === 1 ? '': 's'} de atraso`;
+                A viagem começou às ${d.HORARIO_SAIDA} e atrasou ${d.ATRASO} minuto${d.ATRASO===1?'':'s'}`;
       }
     },
     grid: { left:50, right:160, bottom:80, containLabel:true },
-    xAxis: { name: 'Tempo de atraso (min)', type: 'value' },
-    yAxis: { name: 'Tempo da viagem (min)', type: 'value' },
+    xAxis: {
+      name: 'Data da viagem',
+      type: 'time',
+      axisLabel: { formatter: val => new Date(val).toLocaleDateString('pt-BR') }
+    },
+    yAxis: {
+      name: 'Horário de saída',
+      type: 'value',
+      minInterval: 1,
+      axisLabel: {
+        formatter: val => {
+          const v = Math.round(val);
+          const h = Math.floor(v / 60);
+          const m = v % 60;
+          return m === 0 ? `${h}h` : `${h}h${m}m`;
+        }
+      }
+    },
     dataZoom: [
       { type: 'inside', xAxisIndex: 0 },
       { type: 'inside', yAxisIndex: 0 },
@@ -240,18 +264,34 @@ function renderScatter(data){
     ],
     visualMap: [{
       type: 'continuous',
-      min: 0, max: 1,
-      dimension: 2,
-      inRange: { color: ['#2b83ba', '#fdae61', '#d73027'] },
-      text: ['Próximo ao pico','Longe do pico'],
+      min: 0,
+      max: atrasoMax,
+      dimension: 2, // terceira posição = ATRASO
+      inRange: { color: ['#2b83ba', '#d73027'] }, // azul = pouco atraso, vermelho = muito atraso
+      text: ['Muito atraso','Pouco atraso'],
       right: 45, top: 150,
       calculable: true,
     }],
     series: [{
       type: 'scatter',
       symbolSize: 8,
-      encode: { x:0, y:1 },
-      data: scatterData
+      data: scatterData,
+      markArea: {
+        silent: true,
+        itemStyle: {
+          color: 'rgba(255, 230, 200, 0.3)'
+        },
+        data: [
+          [
+            { yAxis: 360 },
+            { yAxis: 480 } 
+          ],
+          [
+            { yAxis: 840 },
+            { yAxis: 960 }
+          ]
+        ]
+      }
     }]
   });
 }
@@ -285,21 +325,16 @@ loadAndRender();
 window.addEventListener('resize', ()=> chart.resize());
 window.addEventListener('resize', ()=> radarChart.resize());
 
-// --- cor baseada no peakScore ---
 function getRadarColor(peakScore) {
-    // mesmo gradiente do scatterplot: 0 = azul (#2b83ba), 0.5 = laranja (#fdae61), 1 = vermelho (#d73027)
     if (peakScore <= 0.5) {
-        // interpolação azul -> laranja
         const t = peakScore / 0.5;
         return interpolateColor('#2b83ba', '#fdae61', t);
     } else {
-        // interpolação laranja -> vermelho
         const t = (peakScore - 0.5) / 0.5;
         return interpolateColor('#fdae61', '#d73027', t);
     }
 }
 
-// função de interpolação de cor simples (hex para rgb e interpolação linear)
 function interpolateColor(c1, c2, t) {
     const hexToRgb = h => h.match(/\w\w/g).map(x => parseInt(x,16));
     const [r1,g1,b1] = hexToRgb(c1.slice(1));
@@ -338,18 +373,15 @@ function mapearMotivo(motivo) {
     return mapa[motivo] || "motivos desconhecidos";
 }
 
-// --- Radar ---
 chart.on('click', params => {
-  const d = params.data[4]; // viagem clicada
+  const d = params.data[4];
 
   overlay.style.pointerEvents='auto';
   overlay.style.opacity=1;
 
-// Ao clicar em um ponto do scatterplot:
 radarTitle.innerHTML = `Condições da viagem de <span class="blueText">${d.ESTACAO_IDA} -> ${d.ESTACAO_CHEGADA}</span> em ${formatDatePtBr(d.DATA_VIAGEM)}`;
 radarSubtitle.innerHTML = `A viagem começou às ${formatTimePtBr(d.HORARIO_SAIDA)} e era prevista para chegar às ${formatTimePtBr(d.HORARIO_CHEGADA)}, mas atrasou ${d.ATRASO} minuto${d.ATRASO===1?'':'s'} por ${mapearMotivo(d.MOTIVO_ATRASO)}.`;
 
-  // --- Calcular pontualidade (%) ---
 const tempoReal = d.TEMPO + d.ATRASO;
 const pontualidade = tempoReal > 0 ? (d.TEMPO / tempoReal) * 100 : 0;
 const tempoViagem = d.TEMPO || 0;
