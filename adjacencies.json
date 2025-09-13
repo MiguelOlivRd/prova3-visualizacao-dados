@@ -1,91 +1,38 @@
 {
-  "London Paddington": [
-    "London Waterloo",
-    "Oxford",
-    "Reading",
-    "Liverpool Lime Street",
-    "Manchester Piccadilly"
-  ],
-  "London Kings Cross": [
-    "York",
-    "Edinburgh Waverley",
-    "Liverpool Lime Street"
-  ],
-  "Liverpool Lime Street": [
-    "Birmingham New Street",
-    "London Euston",
-    "London Paddington",
-    "Sheffield",
-    "Leeds",
-    "London St Pancras",
-    "Crewe",
-    "Manchester Piccadilly"
-  ],
-  "London Euston": [
-    "Oxford",
-    "York",
-    "Birmingham New Street",
-    "Manchester Piccadilly"
-  ],
-  "York": [
-    "Wakefield",
-    "Birmingham New Street",
-    "Peterborough",
-    "Edinburgh",
-    "Edinburgh Waverley",
-    "Doncaster",
-    "Leeds",
-    "Liverpool Lime Street",
-    "Durham"
-  ],
-  "Manchester Piccadilly": [
-    "Nottingham",
-    "London Euston",
-    "Sheffield",
-    "London Kings Cross",
-    "Leeds",
-    "London St Pancras",
-    "Liverpool Lime Street",
-    "London Paddington",
-    "York",
-    "Warrington"
-  ],
   "Birmingham New Street": [
     "London Euston",
-    "Stafford",
-    "London Paddington",
-    "Edinburgh",
-    "Reading",
-    "Wolverhampton",
-    "London Kings Cross",
-    "London St Pancras",
-    "Liverpool Lime Street",
-    "Manchester Piccadilly",
-    "York",
-    "Coventry",
-    "Tamworth",
-    "Nuneaton"
-  ],
-  "London St Pancras": [
-    "Wolverhampton",
-    "Birmingham New Street",
-    "Leicester"
-  ],
-  "Oxford": [
-    "Bristol Temple Meads"
-  ],
-  "Reading": [
-    "Birmingham New Street",
-    "Oxford",
-    "Didcot",
-    "Liverpool Lime Street",
-    "London Paddington",
-    "Swindon"
+    "Manchester Piccadilly"
   ],
   "Edinburgh Waverley": [
     "London Kings Cross"
   ],
-  "Bristol Temple Meads": [
-    "Cardiff Central"
+  "Liverpool Lime Street": [
+    "London Paddington",
+    "London Euston",
+    "Manchester Piccadilly"
+  ],
+  "London Euston": [
+    "York",
+    "Birmingham New Street"
+  ],
+  "London Kings Cross": [
+    "York"
+  ],
+  "London Paddington": [
+    "Reading"
+  ],
+  "Manchester Piccadilly": [
+    "Nottingham",
+    "London Euston",
+    "Leeds",
+    "Liverpool Lime Street"
+  ],
+  "Oxford": [
+    "Bristol Temple Meads"
+  ],
+  "York": [
+    "Wakefield",
+    "Durham",
+    "Doncaster"
   ]
 }

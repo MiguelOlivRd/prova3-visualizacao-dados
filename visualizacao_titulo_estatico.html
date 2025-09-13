@@ -178,10 +178,17 @@ function loadAndRender(){
     .catch(e=>{ console.error(e); alert('Erro ao carregar viagens_atrasadas.csv'); });
 }
 
-function populateStationSelects(){
+async function populateStationSelects(){
   const fromSel = document.getElementById('fromSelect');
   const toSel = document.getElementById('toSelect');
-  const froms = Array.from(new Set(allData.map(d=>d.ESTACAO_IDA))).sort();
+  // Carregar as chaves de adjacencies.json como froms
+  let froms = [];
+  await fetch('./adjacencies.json')
+    .then(r => r.json())
+    .then(data => {
+      froms = Object.keys(data).sort();
+    })
+    .catch(e => { console.error('Erro ao carregar adjacencies.json', e); });
 
   const tos = Array.from(new Set(allData.map(d=>d.ESTACAO_CHEGADA))).sort();
   froms.forEach(s=>{ 
