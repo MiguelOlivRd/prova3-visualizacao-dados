@@ -485,14 +485,11 @@ loadAndRender();
 window.addEventListener('resize', ()=> chart.resize());
 window.addEventListener('resize', ()=> radarChart.resize());
 
-function getRadarColor(peakScore) {
-    if (peakScore <= 0.5) {
-        const t = peakScore / 0.5;
-        return interpolateColor('#2b83ba', '#fdae61', t);
-    } else {
-        const t = (peakScore - 0.5) / 0.5;
-        return interpolateColor('#fdae61', '#d73027', t);
-    }
+function getRadarColor(atraso) {
+    const atrasoMin = 1;
+    const atrasoMax = 180;
+    const t = Math.min(Math.max((atraso - atrasoMin) / (atrasoMax - atrasoMin), 0), 1);
+    return interpolateColor('#2b83ba', '#d73027', t);
 }
 
 function interpolateColor(c1, c2, t) {
@@ -546,7 +543,8 @@ function renderRadarForIndex(index) {
 
     const tempoReal = d.TEMPO + d.ATRASO;
     const pontualidade = tempoReal > 0 ? (d.TEMPO / tempoReal) * 100 : 0;
-    const color = getRadarColor(d.peakScore);
+    console.log(d.ATRASO)
+    const color = getRadarColor(d.ATRASO);
 
     radarChart.setOption({
         tooltip: {
