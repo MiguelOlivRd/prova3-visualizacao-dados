@@ -78,6 +78,8 @@
   .blueText {color: rgb(117, 181, 255);}
   #legend{text-align: center; margin-top: 20px; color: rgb(115, 115, 117)}
   .peakHighlight{color: #d73027;}
+  .available { color: black; font-weight: 600; }
+  .unavailable { color: #cccccc; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 </head>
@@ -278,28 +280,16 @@ async function updateToStations(){
   const fromSel = document.getElementById('fromSelect');
   const toSel = document.getElementById('toSelect');
   const availableToStations = adjacencies[fromSel.value] || [];
-  if (!availableToStations.includes(toSel.value)) {
-    toSel.innerHTML = '<option value="">qualquer estação</option>';
-  }
-  if (!fromSel.value) {
-    console.log("selecionou qualquer!");
-    populateTos();
-    return;
-  }
-
-  const tos = Array.from(new Set(availableToStations.sort()));
-  tos.forEach(s=>{ 
-    const o = document.createElement('option'); 
-    o.value=s; 
-    o.textContent=s;
-    availableToStations.includes(s) ? toSel.appendChild(o) : null; });
-  Array.from(toSel.options).forEach(opt => {
-    if (opt.value && !availableToStations.includes(opt.value)) {
-      toSel.removeChild(opt);
+    
+  for (let i = 0; i < toSel.options.length; i++) {
+    const opt = toSel.options[i];
+    if (!opt.value) continue; // skip "qualquer estação"
+    if (availableToStations.includes(opt.value) || fromSel.value === '') {
+      opt.className = "available";
+    } else {
+      opt.className = "unavailable";
     }
-  });
-
-  removeToDuplicates();
+  }
 }
 
 async function updateFromStations(){
@@ -314,30 +304,16 @@ async function updateFromStations(){
   const fromSel = document.getElementById('fromSelect');
   const toSel = document.getElementById('toSelect');
   const availableFromStations = reverse_adjacencies[toSel.value] || [];
-  if (!availableFromStations.includes(fromSel.value)) {
-    fromSel.innerHTML = '<option value="">qualquer estação</option>';
-  }
-  if (!toSel.value) {
-    console.log("selecionou qualquer!");
-    populateFroms();
-    return;
-  }
 
-  console.log(toSel.value == "");
-  const froms = Array.from(new Set(availableFromStations.sort()));
-  froms.forEach(s=>{
-    const o = document.createElement('option'); 
-    o.value=s; 
-    o.textContent=s;
-    availableFromStations.includes(s) ? fromSel.appendChild(o) : null; });
-
-  Array.from(fromSel.options).forEach(opt => {
-    if (opt.value && !availableFromStations.includes(opt.value)) {
-      fromSel.removeChild(opt);
+  for (let i = 0; i < fromSel.options.length; i++) {
+    const opt = fromSel.options[i];
+    if (!opt.value) continue; // skip "qualquer estação"
+    if (availableFromStations.includes(opt.value) || toSel.value === '') {
+      opt.className = "available";
+    } else {
+      opt.className = "unavailable";
     }
-  });
-
-  removeFromDuplicates();
+  }
 }
 
 function renderScatter(data){
