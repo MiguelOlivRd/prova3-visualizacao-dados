@@ -281,8 +281,10 @@ async function updateToStations(){
     if (!opt.value) continue; // skip "qualquer estação"
     if (availableToStations.includes(opt.value) || fromSel.value === '') {
       opt.className = "available";
+      opt.disabled = false;
     } else {
       opt.className = "unavailable";
+      opt.disabled = true;
     }
   }
 
@@ -309,8 +311,10 @@ async function updateFromStations(){
     if (!opt.value) continue; // skip "qualquer estação"
     if (availableFromStations.includes(opt.value) || toSel.value === '') {
       opt.className = "available";
+      opt.disabled = false
     } else {
       opt.className = "unavailable";
+      opt.disabled = true
     }
   }
 
@@ -390,7 +394,7 @@ function renderScatter(data){
     ],
     visualMap: [{
       type: 'continuous',
-      min: 0,
+      min: 1,
       max: atrasoMax,
       dimension: 2,
       inRange: { color: ['#2b83ba', '#d73027'] },
