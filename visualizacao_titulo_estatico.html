@@ -5,73 +5,73 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Relação entre tempo de viagem e atraso — ECharts</title>
 <style>
-    body { font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; margin: 12px; }
-    #chart { width:100%; height:550px;}
-    #title {margin-left: 10px; margin-top: 30px; font-weight:300; font-size:x-large; position:relative; color: rgb(115, 115, 117);}
-    #stationFilters { display:none;}
-    #titleSpan {
-        cursor: pointer;
-        color: rgb(117, 181, 255);
-        border: 1px dashed rgb(117, 181, 255);
-        border-radius: 6px;
-        padding: 4px;
-        transition: all 0.3s ease;
-    }
+  body { font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; margin: 12px; }
+  #chart { width:100%; height:550px;}
+  #title {margin-left: 10px; margin-top: 30px; font-weight:300; font-size:x-large; position:relative; color: rgb(115, 115, 117);}
+  #stationFilters { display:none;}
+  #titleSpan {
+      cursor: pointer;
+      color: rgb(117, 181, 255);
+      border: 1px dashed rgb(117, 181, 255);
+      border-radius: 6px;
+      padding: 4px;
+      transition: all 0.3s ease;
+  }
 
-    #titleSpan:hover {
-        background-color: rgb(117, 181, 255);
-        color: white;
-        border-color: transparent;
-    }
-    select {
-        border: 2px solid #dddddd;
-        background: #eeeeee;
-        padding:6px 10px;
-        transition: 0.4s;
-        }
-
-        select:hover,
-        select:focus {
-        background: #dddddd;
-    }
-    select,
-        ::picker(select) {
-        appearance: base-select;
-        border: none;
-    }
-    option {
-        font-size: small;
-        display: flex;
-        justify-content: flex-start;
-        gap: 20px;
-        background: #eeeeee;
-        padding: 10px;
-        transition: 0.4s;
-    }
-    option:first-of-type {
-    border-radius: 8px 8px 0 0;
-    }
-
-    option:last-of-type {
-    border-radius: 0 0 8px 8px;
-    }
-
-    option:not(option:last-of-type) {
-    border-bottom: none;
-    }
-    option:nth-of-type(odd) {
-    background: white;
-    }
-
-    option:hover,
-    option:focus {
-    background: rgb(117, 181, 255);
-    color: white;
-    }
-    option.unavailable:checked {
-      background: red;
+  #titleSpan:hover {
+      background-color: rgb(117, 181, 255);
       color: white;
-    }
+      border-color: transparent;
+  }
+  select {
+      border: 2px solid #dddddd;
+      background: #eeeeee;
+      padding:6px 10px;
+      transition: 0.4s;
+      }
+
+      select:hover,
+      select:focus {
+      background: #dddddd;
+  }
+  select,
+      ::picker(select) {
+      appearance: base-select;
+      border: none;
+  }
+  option {
+      font-size: small;
+      display: flex;
+      justify-content: flex-start;
+      gap: 20px;
+      background: #eeeeee;
+      padding: 10px;
+      transition: 0.4s;
+  }
+  option:first-of-type {
+  border-radius: 8px 8px 0 0;
+  }
+
+  option:last-of-type {
+  border-radius: 0 0 8px 8px;
+  }
+
+  option:not(option:last-of-type) {
+  border-bottom: none;
+  }
+  option:nth-of-type(odd) {
+  background: white;
+  }
+
+  option:hover,
+  option:focus {
+  background: rgb(117, 181, 255);
+  color: white;
+  }
+  option.unavailable:checked {
+    background: red;
+    color: white;
+  }
 
   #radar { width:100%; height:500px; transition: opacity 0.5s; margin-top: 0; }
   #applyBtn { margin-left:6px; vertical-align: middle; font-weight: 700; color: rgb(115, 115, 117); cursor: pointer; border: none; height: 40px; width: 40px; border-radius: 100%; background: #eeeeee; padding:0 10px; transition: 0.4s;}
@@ -90,7 +90,8 @@
     border-radius: 8px;
     padding: 12px 20px;
     transition: background-color 0.3s ease;
-}#backBtn:hover { background: #dddddd; }
+  }
+  #backBtn:hover, #prevBtn:hover, #nextBtn:hover { background: #dddddd; }
   #radarTitle { text-align:center; margin-top:30px; font-weight:300; font-size:x-large;color: rgb(115, 115, 117); }
   #radarSubtitle { text-align:center; margin-bottom:10px; margin-top:10px; font-weight:300; font-size:medium;color: rgb(115, 115, 117);}
   .paragraph {margin: 8px 0;}
@@ -99,6 +100,41 @@
   .peakHighlight{color: #d73027;}
   .available { color: black; font-weight: 600; }
   .unavailable { color: #cccccc; }
+
+  #prevBtn:disabled, #nextBtn:disabled {
+      background-color: #f5f5f5;
+      color: #999999;
+      cursor: not-allowed;
+      opacity: 0.5;
+  }
+
+  #prevBtn:disabled:hover, #nextBtn:disabled:hover {
+      background-color: #f5f5f5;
+      color: #999999;
+  }
+
+  #prevBtn, #nextBtn {
+    font-size: 16px;
+    background-color: #eeeeee;
+    border: 2px solid #dddddd;
+    color: rgb(115, 115, 117);
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 12px 20px;
+    transition: background-color 0.3s ease;
+  }
+
+  #prevBtn:hover, #nextBtn:hover { 
+      background: #dddddd; 
+  }
+
+  #navButtons {
+      display: flex;
+      justify-content: center; 
+      gap: 8px; 
+      margin-bottom: 16px;
+  }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 </head>
@@ -124,6 +160,10 @@
   <div id="radarTitle"></div>
   <div id="radarSubtitle"></div>
   <div id="radar"></div>
+  <div id="navButtons">
+    <button id="prevBtn">Viagem anterior</button>
+    <button id="nextBtn">Próxima viagem</button>
+  </div>
   <button id="backBtn">Voltar</button>
 </div>
 
@@ -278,7 +318,7 @@ async function updateToStations(){
     
   for (let i = 0; i < toSel.options.length; i++) {
     const opt = toSel.options[i];
-    if (!opt.value) continue; // skip "qualquer estação"
+    if (!opt.value) continue;
     if (availableToStations.includes(opt.value) || fromSel.value === '') {
       opt.className = "available";
       opt.disabled = false;
@@ -308,7 +348,7 @@ async function updateFromStations(){
 
   for (let i = 0; i < fromSel.options.length; i++) {
     const opt = fromSel.options[i];
-    if (!opt.value) continue; // skip "qualquer estação"
+    if (!opt.value) continue;
     if (availableFromStations.includes(opt.value) || toSel.value === '') {
       opt.className = "available";
       opt.disabled = false
@@ -324,7 +364,6 @@ async function updateFromStations(){
 }
 
 function renderScatter(data){
-  // Preparar os dados para o scatter
     if (!data || data.length === 0) {
       chart.clear();
       return;
@@ -333,22 +372,20 @@ function renderScatter(data){
     const x = new Date(d.DATA_VIAGEM).getTime();
     const timeParts = (d.HORARIO_SAIDA || "00:00").split(':');
     const y = Number(timeParts[0])*60 + Number(timeParts[1]);
-    return [x, y, d.ATRASO, d.PASSAGEIROS, d]; // mantemos o objeto original
+    return [x, y, d.ATRASO, d.PASSAGEIROS, d];
   });
 
-  // Calcular valores para o visualMap
   const atrasos = data.map(d => d.ATRASO || 0);
   const atrasoMax = Math.max(...atrasos);
   const atrasoMin = Math.min(...atrasos);
 
-  // Agrupar dados por data + hora
   const dataByDateHour = {};
   scatterData.forEach(d => {
     const date = new Date(d[0]).toDateString();
     const hour = d[1];
     const key = `${date}_${hour}`;
     if (!dataByDateHour[key]) dataByDateHour[key] = [];
-    dataByDateHour[key].push(d[4]); // guardamos o objeto original
+    dataByDateHour[key].push(d[4]);
   });
 
   chart.setOption({
@@ -364,7 +401,7 @@ function renderScatter(data){
           const formatter = new Intl.DateTimeFormat('pt-BR',{day:'numeric', month:'long', year:'numeric'});
           return `${d.ESTACAO_IDA} -> ${d.ESTACAO_CHEGADA}, em ${formatter.format(dateObj)}<br>
                   A viagem começou às ${d.HORARIO_SAIDA} e atrasou ${d.ATRASO} minuto${d.ATRASO===1?'':'s'}`;
-        }).join('<br><hr>'); // separa viagens distintas
+        }).join('<br><hr>');
       }
     },
     grid: { left:50, right:160, bottom:80, containLabel:true },
@@ -496,63 +533,97 @@ function mapearMotivo(motivo) {
     return mapa[motivo] || "motivos desconhecidos";
 }
 
-chart.on('click', params => {
-  const d = params.data[4];
+let viagensNoPonto = [];
+let currentIndex = 0;
 
-  overlay.style.pointerEvents='auto';
-  overlay.style.opacity=1;
+function renderRadarForIndex(index) {
+    const d = viagensNoPonto[index];
+    overlay.style.pointerEvents = 'auto';
+    overlay.style.opacity = 1;
 
-radarTitle.innerHTML = `Condições da viagem de <span class="blueText">${d.ESTACAO_IDA} -> ${d.ESTACAO_CHEGADA}</span> em ${formatDatePtBr(d.DATA_VIAGEM)}`;
-radarSubtitle.innerHTML = `A viagem começou às ${formatTimePtBr(d.HORARIO_SAIDA)} e era prevista para chegar às ${formatTimePtBr(d.HORARIO_CHEGADA)}, mas atrasou ${d.ATRASO} minuto${d.ATRASO===1?'':'s'} por ${mapearMotivo(d.MOTIVO_ATRASO)}.`;
+    radarTitle.innerHTML = `Condições da viagem <span class="blueText">${index + 1}/${viagensNoPonto.length}</span> de <span class="blueText">${d.ESTACAO_IDA} -> ${d.ESTACAO_CHEGADA}</span> em ${formatDatePtBr(d.DATA_VIAGEM)}`;
+    radarSubtitle.innerHTML = `A viagem começou às ${formatTimePtBr(d.HORARIO_SAIDA)} e era prevista para chegar às ${formatTimePtBr(d.HORARIO_CHEGADA)}, mas atrasou ${d.ATRASO} minuto${d.ATRASO===1?'':'s'} por ${mapearMotivo(d.MOTIVO_ATRASO)}.`;
 
-const tempoReal = d.TEMPO + d.ATRASO;
-const pontualidade = tempoReal > 0 ? (d.TEMPO / tempoReal) * 100 : 0;
-const tempoViagem = d.TEMPO || 0;
+    const tempoReal = d.TEMPO + d.ATRASO;
+    const pontualidade = tempoReal > 0 ? (d.TEMPO / tempoReal) * 100 : 0;
+    const color = getRadarColor(d.peakScore);
 
-const color = getRadarColor(d.peakScore);
+    radarChart.setOption({
+        tooltip: {
+            formatter: function(params) {
+                const v = params.data.value;
+                return `
+                  <b>Perfil da viagem</b> <br><br>
+                  Pontualidade: <b>${v[0]}%</b><br>
+                  Tempo de viagem: <b>${v[1]} min</b><br>
+                  Primeira classe: <b>${v[2]}%</b><br>
+                  Compras antecipadas: <b>${v[3]}%</b><br>
+                  Pedidos de reembolso: <b>${v[4]}%</b><br>
+                  Preço médio: <b>£${v[5]}</b>
+                `;
+            }
+        },
+        radar: {
+            indicator: [
+                { name: 'Pontualidade (%)', max: 100 },
+                { name: 'Tempo de viagem (min)', max: 300 },
+                { name: 'Primeira classe (%)', max: 100 },
+                { name: 'Compras antecipadas (%)', max: 100 },
+                { name: 'Pedidos reembolso (%)', max: 100 },
+                { name: 'Preço médio (£)', max: 200 },
+            ]
+        },
+        series: [{
+            type: 'radar',
+            data: [{
+                value: [
+                    Number(pontualidade.toFixed(1)),
+                    Number(tempoReal.toFixed(1)),
+                    Number(d.PCT_PRIMEIRA_CLASSE.toFixed(1)),
+                    Number(d.PCT_COMPRAS_ANTECIPADAS.toFixed(1)),
+                    Number(d.PCT_PEDIDOS_REEMBOLSO.toFixed(1)),
+                    Number(d.PRECO_MEDIO.toFixed(1)),
+                ],
+                name: `Viagem ${index+1} de ${viagensNoPonto.length}`,
+                lineStyle: { color: color },
+                itemStyle: { color: color }
+            }]
+        }]
+    });
+    document.getElementById('prevBtn').disabled = viagensNoPonto.length <= 1;
+    document.getElementById('nextBtn').disabled = viagensNoPonto.length <= 1;
+}
 
-radarChart.setOption({
-  tooltip: {
-    formatter: function(params) {
-      const v = params.data.value;
-      return `
-        <b>Perfil da viagem</b> <br><br>
-        Pontualidade: <b>${v[0]}%</b><br>
-        Tempo de viagem: <b>${v[1]} min</b><br>
-        Primeira classe: <b>${v[2]}%</b><br>
-        Compras antecipadas: <b>${v[3]}%</b><br>
-        Pedidos de reembolso: <b>${v[4]}%</b><br>
-        Preço médio: <b>£${v[5]}</b>
-      `;
+document.getElementById('prevBtn').onclick = () => {
+    if(viagensNoPonto.length > 1){
+        currentIndex = (currentIndex - 1 + viagensNoPonto.length) % viagensNoPonto.length;
+        renderRadarForIndex(currentIndex);
     }
-  },
-  radar: {
-    indicator: [
-      { name: 'Pontualidade (%)', max: 100 },
-      { name: 'Tempo de viagem (min)', max: 300 },
-      { name: 'Primeira classe (%)', max: 100 },
-      { name: 'Compras antecipadas (%)', max: 100 },
-      { name: 'Pedidos reembolso (%)', max: 100 },
-      { name: 'Preço médio (£)', max: 200 },
-    ]
-  },
-  series: [{
-    type: 'radar',
-    data: [{
-        value: [
-            Number(pontualidade.toFixed(1)),
-            Number((tempoReal).toFixed(1)),
-            Number(d.PCT_PRIMEIRA_CLASSE.toFixed(1)),
-            Number(d.PCT_COMPRAS_ANTECIPADAS.toFixed(1)),
-            Number(d.PCT_PEDIDOS_REEMBOLSO.toFixed(1)),
-            Number(d.PRECO_MEDIO.toFixed(1)),
-        ],
-        name: 'Viagem selecionada',
-        lineStyle: { color: color },
-        itemStyle: { color: color }
-    }]
-  }]
-});
+};
+
+document.getElementById('nextBtn').onclick = () => {
+  console.log("SALVE JORGE!")
+    if(viagensNoPonto.length > 1){
+        currentIndex = (currentIndex + 1) % viagensNoPonto.length;
+        renderRadarForIndex(currentIndex);
+    }
+};
+
+chart.on('click', params => {
+    const d = params.data[4];
+    const date = new Date(d.DATA_VIAGEM).toDateString();
+    const hour = params.data[1];
+    const key = `${date}_${hour}`;
+    
+    viagensNoPonto = allData.filter(v => {
+        const vDate = new Date(v.DATA_VIAGEM).toDateString();
+        const vHour = (v.HORARIO_SAIDA || "00:00").split(':');
+        const vY = Number(vHour[0])*60 + Number(vHour[1]);
+        return vDate === date && vY === hour;
+    });
+
+    currentIndex = 0;
+    renderRadarForIndex(currentIndex);
 });
 
 backBtn.addEventListener('click', ()=>{
