@@ -1,0 +1,48 @@
+{
+  "Wakefield": [
+    "York"
+  ],
+  "Manchester Piccadilly": [
+    "Birmingham New Street",
+    "Liverpool Lime Street"
+  ],
+  "Reading": [
+    "London Paddington"
+  ],
+  "Nottingham": [
+    "Manchester Piccadilly"
+  ],
+  "Leeds": [
+    "Manchester Piccadilly"
+  ],
+  "London Paddington": [
+    "Liverpool Lime Street"
+  ],
+  "London Euston": [
+    "Manchester Piccadilly",
+    "Birmingham New Street",
+    "Liverpool Lime Street"
+  ],
+  "York": [
+    "London Euston",
+    "London Kings Cross"
+  ],
+  "Bristol Temple Meads": [
+    "Oxford"
+  ],
+  "Doncaster": [
+    "York"
+  ],
+  "London Kings Cross": [
+    "Edinburgh Waverley"
+  ],
+  "Durham": [
+    "York"
+  ],
+  "Birmingham New Street": [
+    "London Euston"
+  ],
+  "Liverpool Lime Street": [
+    "Manchester Piccadilly"
+  ]
+}

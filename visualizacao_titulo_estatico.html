@@ -177,27 +177,93 @@ function loadAndRender(){
     })
     .catch(e=>{ console.error(e); alert('Erro ao carregar viagens_atrasadas.csv'); });
 }
+async function populateStationSelects() {
+  populateFroms();
+  populateTos();
+}
 
-async function populateStationSelects(){
-  const fromSel = document.getElementById('fromSelect');
+function removeToDuplicates(){
   const toSel = document.getElementById('toSelect');
-  // Carregar as chaves de adjacencies.json como froms
-  let froms = [];
-  await fetch('./adjacencies.json')
-    .then(r => r.json())
-    .then(data => {
-      froms = Object.keys(data).sort();
-    })
-    .catch(e => { console.error('Erro ao carregar adjacencies.json', e); });
+  const seen = new Set();
+  Array.from(toSel.options).forEach(opt => {
+    if (seen.has(opt.value) && opt.value) {
+      toSel.removeChild(opt);
+    } else {
+      seen.add(opt.value);
+    }
+  });
+}
 
-  const tos = Array.from(new Set(allData.map(d=>d.ESTACAO_CHEGADA))).sort();
-  froms.forEach(s=>{ 
-    const o = document.createElement('option'); 
-    o.value=s; 
-    o.textContent=s;
-    o.onclick = updateToStations; 
-    fromSel.appendChild(o); });
-  
+function removeFromDuplicates(){
+  const fromSel = document.getElementById('fromSelect');
+  const seen = new Set();
+  Array.from(fromSel.options).forEach(opt => {
+    if (seen.has(opt.value) && opt.value) {
+      fromSel.removeChild(opt);
+    } else {
+      seen.add(opt.value);
+    }
+  });
+}
+
+async function populateFroms() {
+  const fromSel = document.getElementById('fromSelect');
+  let current = fromSel.value;
+  fromSel.innerHTML = '<option value="">qualquer estação</option>';
+
+  const froms = await getFromStations();
+  froms.forEach(s => {
+    const o = document.createElement('option');
+    o.value = s;
+    o.textContent = s;
+    fromSel.appendChild(o);
+  });
+
+
+
+  fromSel.value = current;
+  fromSel.onchange = updateToStations;
+}
+
+async function populateTos() {
+  const toSel = document.getElementById('toSelect');
+  let current = toSel.value;
+
+  toSel.innerHTML = '<option value="">qualquer estação</option>';
+
+  const tos = await getToStations();
+  tos.forEach(s => {
+    const o = document.createElement('option');
+    o.value = s;
+    o.textContent = s;
+    toSel.appendChild(o);
+  });
+
+  toSel.value = current;
+
+  toSel.onchange = updateFromStations;
+}
+
+async function getFromStations() {
+  try {
+    const res = await fetch('./adjacencies.json');
+    const data = await res.json();
+    return Object.keys(data).sort();
+  } catch (e) {
+    console.error('Erro ao carregar adjacencies.json', e);
+    return [];
+  }
+}
+
+async function getToStations() {
+  try {
+    const res = await fetch('./reverse_adjacencies.json');
+    const data = await res.json();
+    return Object.keys(data).sort();
+  } catch (e) {
+    console.error('Erro ao carregar reverse_adjacencies.json', e);
+    return [];
+  }
 }
 
 async function updateToStations(){
@@ -212,13 +278,66 @@ async function updateToStations(){
   const fromSel = document.getElementById('fromSelect');
   const toSel = document.getElementById('toSelect');
   const availableToStations = adjacencies[fromSel.value] || [];
-  toSel.innerHTML = '<option value="">qualquer estaçaaoão</option>';
+  if (!availableToStations.includes(toSel.value)) {
+    toSel.innerHTML = '<option value="">qualquer estação</option>';
+  }
+  if (!fromSel.value) {
+    console.log("selecionou qualquer!");
+    populateTos();
+    return;
+  }
+
   const tos = Array.from(new Set(availableToStations.sort()));
   tos.forEach(s=>{ 
     const o = document.createElement('option'); 
     o.value=s; 
     o.textContent=s;
     availableToStations.includes(s) ? toSel.appendChild(o) : null; });
+  Array.from(toSel.options).forEach(opt => {
+    if (opt.value && !availableToStations.includes(opt.value)) {
+      toSel.removeChild(opt);
+    }
+  });
+
+  removeToDuplicates();
+}
+
+async function updateFromStations(){
+  let reverse_adjacencies = {};
+  await fetch('./reverse_adjacencies.json')
+    .then(r => r.json())
+    .then(data => {
+      reverse_adjacencies = data;
+    })
+    .catch(e => { console.error('Erro ao carregar reverse_adjacencies.json', e); });
+
+  const fromSel = document.getElementById('fromSelect');
+  const toSel = document.getElementById('toSelect');
+  const availableFromStations = reverse_adjacencies[toSel.value] || [];
+  if (!availableFromStations.includes(fromSel.value)) {
+    fromSel.innerHTML = '<option value="">qualquer estação</option>';
+  }
+  if (!toSel.value) {
+    console.log("selecionou qualquer!");
+    populateFroms();
+    return;
+  }
+
+  console.log(toSel.value == "");
+  const froms = Array.from(new Set(availableFromStations.sort()));
+  froms.forEach(s=>{
+    const o = document.createElement('option'); 
+    o.value=s; 
+    o.textContent=s;
+    availableFromStations.includes(s) ? fromSel.appendChild(o) : null; });
+
+  Array.from(fromSel.options).forEach(opt => {
+    if (opt.value && !availableFromStations.includes(opt.value)) {
+      fromSel.removeChild(opt);
+    }
+  });
+
+  removeFromDuplicates();
 }
 
 function renderScatter(data){
