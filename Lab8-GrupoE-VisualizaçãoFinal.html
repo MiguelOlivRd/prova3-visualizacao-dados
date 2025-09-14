@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="pt-br"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab8 - Grupo E</title>
+
+    <style>
+      body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #f4f6f9;
+        color: #333;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      .dashboard-header {
+        background-color: #2c3e50;
+        color: white;
+        padding: 30px;
+        text-align: left;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .dashboard-title {
+        margin: 0;
+        font-size: 36px;
+        font-weight: 700;
+      }
+      .lead {
+        font-size: 20px;
+        color: #ecf0f1;
+        margin-top: 10px;
+      }
+      #chart-header {
+        display: flex;
+        align-items: left;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 800px;
+      }
+      #back-button {
+        display: none;
+        margin-top: 20px;
+        padding: 12px;
+        font-size: 16px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s ease;
+      }
+      #back-button:hover {
+        background-color: #2980b9;
+      }
+      .card {
+        margin: 40px auto;
+        border: none;
+        overflow: hidden;
+        background-color: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      .card-header {
+        background-color: #34495e;
+        color: white;
+        padding: 20px;
+        font-size: 18px;
+        font-weight: 600;
+      }
+      .card-body {
+        padding: 30px;
+        font-size: 16px;
+        color: #7f8c8d;
+        line-height: 1.6;
+      }
+      .header-info {
+        padding: 20px 50px;
+        background-color: #a4dceb;
+      }
+      #chart { width:100%; height:550px;}
+      #title {margin-left: 10px; margin-top: 30px; font-weight:300; font-size:x-large; position:relative; color: rgb(115, 115, 117); font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;}
+      #stationFilters { display:none;}
+      #titleSpan {
+          cursor: pointer;
+          color: rgb(117, 181, 255);
+          border: 1px dashed rgb(117, 181, 255);
+          border-radius: 6px;
+          padding: 4px;
+          transition: all 0.3s ease;
+      }
+
+      #titleSpan:hover {
+          background-color: rgb(117, 181, 255);
+          color: white;
+          border-color: transparent;
+      }
+      select {
+          border: 2px solid #dddddd;
+          background: #eeeeee;
+          padding:6px 10px;
+          transition: 0.4s;
+          }
+
+          select:hover,
+          select:focus {
+          background: #dddddd;
+      }
+      select,
+          ::picker(select) {
+          appearance: base-select;
+          border: none;
+      }
+      option {
+          font-size: small;
+          display: flex;
+          justify-content: flex-start;
+          gap: 20px;
+          background: #eeeeee;
+          padding: 10px;
+          transition: 0.4s;
+      }
+      option:first-of-type {
+      border-radius: 8px 8px 0 0;
+      }
+
+      option:last-of-type {
+      border-radius: 0 0 8px 8px;
+      }
+
+      option:not(option:last-of-type) {
+      border-bottom: none;
+      }
+      option:nth-of-type(odd) {
+      background: white;
+      }
+
+      option:hover,
+      option:focus {
+      background: rgb(117, 181, 255);
+      color: white;
+      }
+      option.unavailable:checked {
+        background: red;
+        color: white;
+      }
+
+      #applyBtn { margin-left:6px; vertical-align: middle; font-weight: 700; color: rgb(115, 115, 117); cursor: pointer; border: none; height: 40px; width: 40px; border-radius: 100%; background: #eeeeee; padding:0 10px; transition: 0.4s;}
+      #applyBtn:hover{ background: #dddddd; }
+      #titleSpan {cursor:pointer; color: rgb(117, 181, 255); border: 1px dashed rgb(117, 181, 255); border-radius: 6px; padding: 4px;}
+      #overlay {
+        text-align: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: white;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.5s;
+        overflow: auto; 
+        box-sizing: border-box;
+      }
+      #backBtn {
+        display: block;
+        margin: 0 auto;
+        font-size: 16px;
+        background-color: #eeeeee;
+        border: 2px solid #dddddd;
+        color: rgb(115, 115, 117);
+        border: none;
+        cursor: pointer;
+        border-radius: 8px;
+        padding: 12px 20px;
+        transition: background-color 0.3s ease;
+      }
+      #backBtn:hover, #prevBtn:hover, #nextBtn:hover { background: #dddddd; }
+      #radarTitle {
+          font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+          text-align: center;
+          margin-top: 30px;
+          font-weight: 300;
+          font-size: x-large;
+          color: rgb(115, 115, 117);
+      }
+
+      #radarSubtitle {
+          font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+          text-align: center;
+          margin-top: 10px;
+          margin-bottom: 10px;
+          font-weight: 300;
+          font-size: medium;
+          color: rgb(115, 115, 117);
+      }
+
+      #radar {
+          margin: 10px auto 0 auto;
+          width: 80%;
+          height: 60vh;
+      }
+      .paragraph {margin: 8px 0;}
+      .blueText {color: rgb(117, 181, 255);}
+      #legend{text-align: center; margin-top: 20px; color: rgb(115, 115, 117)}
+      .peakHighlight{color: #d73027;}
+      .available { color: black; font-weight: 600; }
+      .unavailable { color: #cccccc; }
+
+      #prevBtn:disabled, #nextBtn:disabled {
+          background-color: #f5f5f5;
+          color: #999999;
+          cursor: not-allowed;
+          opacity: 0.5;
+      }
+
+      #prevBtn:disabled:hover, #nextBtn:disabled:hover {
+          background-color: #f5f5f5;
+          color: #999999;
+      }
+
+      #prevBtn, #nextBtn {
+        font-size: 16px;
+        background-color: #eeeeee;
+        border: 2px solid #dddddd;
+        color: rgb(115, 115, 117);
+        border: none;
+        cursor: pointer;
+        border-radius: 8px;
+        padding: 12px 20px;
+        transition: background-color 0.3s ease;
+      }
+
+      #prevBtn:hover, #nextBtn:hover { 
+          background: #dddddd; 
+      }
+
+      #navButtons {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      #navButtons button {
+          float: none;
+          margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header-info">
+      <table style="width: 100%; border: 0">
+        <tbody><tr>
+          <td style="text-align: left; vertical-align: top">
+            <table style="border: 0">
+              <tbody><tr>
+                <td style="width: 70px">
+                  <img src="https://maxmcz.github.io/visualizacao-de-dados_exemplo/UFCG_logo_png.png" alt="Brasão UFCG" style="margin-top: 5px; height: 62px">
+                </td>
+                <td>
+                  <div style="line-height: 1.4">
+                    <div>
+                      <strong>UNIVERSIDADE FEDERAL DE CAMPINA GRANDE - UFCG</strong>
+                    </div>
+                    <div>
+                      CENTRO DE ENGENHARIA ELÉTRICA E INFORMÁTICA - CEEI
+                    </div>
+                    <div>UNIDADE ACADÊMICA DE SISTEMAS E COMPUTAÇÃO - UASC</div>
+                  </div>
+                </td>
+              </tr>
+            </tbody></table>
+          </td>
+
+          <td style="text-align: right; vertical-align: top">
+            <div>Disciplina: Visualização de Dados</div>
+            <div>Professor: Maxwell Guimarães de Oliveira</div>
+            <div>Período: 2025.1</div>
+          </td>
+        </tr>
+      </tbody></table>
+    </div>
+
+    <div id="header">
+      <h2 style="text-align: center">
+        Projeto de Visualização Interativa de Dados
+      </h2>
+      <h4 style="text-align: center">
+        <u>Grupo E</u>: Emile Christie,  Evaldo Alves,  Luiz Sergio Pompeu, Miguel Macedo, Miguel de Oliveira &nbsp; &nbsp;
+      </h4>
+      <h2 style="text-align: center">
+        <span style="
+            font-family: 39,Lucida Sans Unicode,Lucida Grande, sans-serif;
+          "><strong>Tempo de atraso na chegada das viagens por trem no Reino Unido</strong></span>
+      </h2>
+      <p style="text-align: justify; padding: 10px 50px 10px 50px">
+        Os dados (disponíveis em: <a href="https://mavenanalytics.io/data-playground/uk-train-rides" target="_blank">https://mavenanalytics.io/data-playground/uk-train-rides<a>) descrevem registros fictícios de viagens de trens pelo Reino Unido durante os 4 primeiros meses de 2024, disponibilizando informações diversas sobre elas, como data da viajem, duração da mesma, sua estação de saída e seu destino. A partir deles, foi realizada a visualização abaixo a fim de analisar os atrasos ocorridos nas viagens, dando destaque aos horários de pico da malha ferroviária e os pontos de saída/chegada de cada estação, visando fornecer insights valiosos para clientes que planejam utilizar esse meio de transporte e para as próprias empresas ferroviárias que podem utilizá-lo para entender problemas ocorridos em suas linhas.
+      </p>
+    </div>
+
+    <div id="title">
+      <span id="titleSpan">Viagens em todo o Reino Unido</span> 
+          <span id="stationFilters">
+              <label>Viagens de</label>
+              <select id="fromSelect"><option value="">qualquer estação</option></select>
+              <label>para</label>
+              <select id="toSelect"><option value="">qualquer estação</option></select>
+              <button id="applyBtn">OK</button>
+      </span>
+    </div>
+
+    <div id="chart"></div>
+    <div id="legend">
+      *Os horários de pico considerados foram pela manhã, entre as <span class="peakHighlight">06h e 08h</span>, e pela tarde, entre as <span class="peakHighlight">14h e 16h</span>, horários com mais movimento em todos os meses analisados.
+    </div>
+
+    <div id="overlay">
+      <div id="radarTitle"></div>
+      <div id="radarSubtitle"></div>
+      <div id="radar"></div>
+      <div id="navButtons">
+        <button id="prevBtn">Viagem anterior</button>
+        <button id="nextBtn">Próxima viagem</button>
+      </div>
+      <button id="backBtn">Voltar</button>
+    </div>
+
+    <div id="footer" style="height: 2%; margin-top: 150px">
+      <p style="text-align: justify; padding: 20px 50px 0px 50px">
+        <b>Dicas para interagir com a visualização</b>:
+      </p>
+      <ul style="padding: 0px 50px 10px 75px;">
+      <li>Utilize a roda de rolagem em conjunto com o cursor do mouse ou as as barras mais externas da vizualização para aplicar zoom em áreas específicas dela;</li>
+      <li>Clique no texto acima do gráfico para selecionar o ponto de partida e/ou chegar e aperte "ok" para filtrar as informações do gráfico usando as estações escolhidas;</li>
+      <li>Utilize a barra lateral direita mais interna para filtrar as viagens pelo seu tempo de atraso;</li>
+      <li>Passe o cursor pelos pontos do gráfico para exibir mais informações sobre todas as viagens realizadas naquela data e hora;</li>
+      <li>Clique em um dos pontos exibidos no gráfico para abrir uma visualização mais detalhada sobre informações das viagens ocorridas naquela data e hora.</li>
+    </ul>
+    </div>
+
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  
+  <!-- Uncomment this line if you want to dataTool extension
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.5.0/dist/extension/dataTool.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to use gl extension
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts-gl@2/dist/echarts-gl.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to echarts-stat extension
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts-stat@latest/dist/ecStat.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to use map
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@4.9.0/map/js/china.js"></script>
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@4.9.0/map/js/world.js"></script>
+  -->
+  <!-- Uncomment these two lines if you want to use bmap extension
+  <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=YOUR_API_KEY"></script>
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.5.0/dist/extension/bmap.min.js"></script>
+  -->
+
+  <script type="text/javascript">
+  const chartDom = document.getElementById('chart');
+  const chart = echarts.init(chartDom);
+  const radarDom = document.getElementById('radar');
+  const radarChart = echarts.init(radarDom);
+  const overlay = document.getElementById('overlay');
+  const backBtn = document.getElementById('backBtn');
+  const radarTitle = document.getElementById('radarTitle');
+  const radarSubtitle = document.getElementById('radarSubtitle');
+
+
+
+  let allData = [];
+
+  function parseCSV(text) {
+    const lines = text.trim().split('\n');
+    const header = lines[0].split(',').map(h=>h.trim());
+    return lines.slice(1).map(l=>{
+      const cols = l.match(/(?:\"[^\"]*\"|[^,])+/g) || l.split(',');
+      const obj = {};
+      header.forEach((h,i)=>{ obj[h] = (cols[i] || '').replace(/^\"|\"$/g,'').trim(); });
+      return obj;
+    });
+  }
+
+  function toNumberSafe(v){ const n = Number(v); return isNaN(n) ? null : n; }
+
+  function computePeakScore(depTimeStr){
+    const parts = (depTimeStr||'00:00').split(':');
+    const h = Number(parts[0]);
+    const m = parts[1] ? Number(parts[1]) : 0;
+    const minutes = h*60 + m;
+    const peaks = [[360,480],[960,1080]];
+    let minDist = Infinity;
+    for(const [a,b] of peaks){
+      if(minutes >= a && minutes <= b){ minDist = 0; break; }
+      const dist = Math.min(Math.abs(minutes - a), Math.abs(minutes - b));
+      if(dist < minDist) minDist = dist;
+    }
+    const cutoff = 120;
+    return Math.max(0, (cutoff - minDist)/cutoff);
+  }
+
+  function loadAndRender(){
+    fetch('viagens_atrasadas.csv')
+      .then(r=>r.text())
+      .then(text=>{
+        allData = parseCSV(text).map(r=>{
+          return {
+            ATRASO: toNumberSafe(r.ATRASO),
+            TEMPO: toNumberSafe(r.TEMPO_ESPERADO_DA_VIAGEM),
+            PASSAGEIROS: toNumberSafe(r.QTD_PASSAGEIROS),
+            ESTACAO_IDA: r.ESTACAO_IDA,
+            ESTACAO_CHEGADA: r.ESTACAO_CHEGADA,
+            DATA_VIAGEM: r.DATA_VIAGEM,
+            HORARIO_SAIDA: r.HORARIO_SAIDA,
+            HORARIO_CHEGADA: r.HORARIO_CHEGADA,
+            PCT_PRIMEIRA_CLASSE: toNumberSafe(r.PCT_PRIMEIRA_CLASSE),
+            PCT_COMPRAS_ANTECIPADAS: toNumberSafe(r.PCT_COMPRAS_ANTECIPADAS),
+            PRECO_MEDIO: toNumberSafe(r.PRECO_MEDIO),
+            PCT_PEDIDOS_REEMBOLSO: toNumberSafe(r.PCT_PEDIDOS_REEMBOLSO),
+            peakScore: computePeakScore(r.HORARIO_SAIDA),
+            MOTIVO_ATRASO: r.MOTIVO_ATRASO,
+          }
+        });
+
+        populateStationSelects();
+        renderScatter(allData);
+      })
+      .catch(e=>{ console.error(e); alert('Erro ao carregar viagens_atrasadas.csv'); });
+  }
+  async function populateStationSelects() {
+    populateFroms();
+    populateTos();
+  }
+
+  async function populateFroms() {
+    const fromSel = document.getElementById('fromSelect');
+    let current = fromSel.value;
+    fromSel.innerHTML = '<option value="">qualquer estação</option>';
+
+    const froms = await getFromStations();
+    froms.forEach(s => {
+      const o = document.createElement('option');
+      o.value = s;
+      o.textContent = s;
+      fromSel.appendChild(o);
+    });
+
+
+
+    fromSel.value = current;
+    fromSel.onchange = updateToStations;
+  }
+
+  async function populateTos() {
+    const toSel = document.getElementById('toSelect');
+    let current = toSel.value;
+
+    toSel.innerHTML = '<option value="">qualquer estação</option>';
+
+    const tos = await getToStations();
+    tos.forEach(s => {
+      const o = document.createElement('option');
+      o.value = s;
+      o.textContent = s;
+      toSel.appendChild(o);
+    });
+
+    toSel.value = current;
+
+    toSel.onchange = updateFromStations;
+  }
+
+  async function getFromStations() {
+    try {
+      const res = await fetch('./adjacencies.json');
+      const data = await res.json();
+      return Object.keys(data).sort();
+    } catch (e) {
+      console.error('Erro ao carregar adjacencies.json', e);
+      return [];
+    }
+  }
+
+  async function getToStations() {
+    try {
+      const res = await fetch('./reverse_adjacencies.json');
+      const data = await res.json();
+      return Object.keys(data).sort();
+    } catch (e) {
+      console.error('Erro ao carregar reverse_adjacencies.json', e);
+      return [];
+    }
+  }
+
+  async function updateToStations(){
+    let adjacencies = {};
+    await fetch('./adjacencies.json')
+      .then(r => r.json())
+      .then(data => {
+        adjacencies = data;
+      })
+      .catch(e => { console.error('Erro ao carregar adjacencies.json', e); });
+
+    const fromSel = document.getElementById('fromSelect');
+    const toSel = document.getElementById('toSelect');
+    const availableToStations = adjacencies[fromSel.value] || [];
+      
+    for (let i = 0; i < toSel.options.length; i++) {
+      const opt = toSel.options[i];
+      if (!opt.value) continue;
+      if (availableToStations.includes(opt.value) || fromSel.value === '') {
+        opt.className = "available";
+        opt.disabled = false;
+      } else {
+        opt.className = "unavailable";
+        opt.disabled = true;
+      }
+    }
+
+    if (toSel.value && !availableToStations.includes(toSel.value)) {
+      toSel.class = 'unavailable';
+    }
+  }
+
+  async function updateFromStations(){
+    let reverse_adjacencies = {};
+    await fetch('./reverse_adjacencies.json')
+      .then(r => r.json())
+      .then(data => {
+        reverse_adjacencies = data;
+      })
+      .catch(e => { console.error('Erro ao carregar reverse_adjacencies.json', e); });
+
+    const fromSel = document.getElementById('fromSelect');
+    const toSel = document.getElementById('toSelect');
+    const availableFromStations = reverse_adjacencies[toSel.value] || [];
+
+    for (let i = 0; i < fromSel.options.length; i++) {
+      const opt = fromSel.options[i];
+      if (!opt.value) continue;
+      if (availableFromStations.includes(opt.value) || toSel.value === '') {
+        opt.className = "available";
+        opt.disabled = false
+      } else {
+        opt.className = "unavailable";
+        opt.disabled = true
+      }
+    }
+
+    if (fromSel.value && !availableFromStations.includes(fromSel.value)) {
+      fromSel.class = 'unavailable';
+    }
+  }
+
+  function renderScatter(data){
+      if (!data || data.length === 0) {
+        chart.clear();
+        return;
+      }
+    const scatterData = data.map(d => {
+      const x = new Date(d.DATA_VIAGEM).getTime();
+      const timeParts = (d.HORARIO_SAIDA || "00:00").split(':');
+      const y = Number(timeParts[0])*60 + Number(timeParts[1]);
+      return [x, y, d.ATRASO, d.PASSAGEIROS, d];
+    });
+
+    const atrasos = data.map(d => d.ATRASO || 0);
+    const atrasoMax = Math.max(...atrasos);
+    const atrasoMin = Math.min(...atrasos);
+
+    const dataByDateHour = {};
+    scatterData.forEach(d => {
+      const date = new Date(d[0]).toDateString();
+      const hour = d[1];
+      const key = `${date}_${hour}`;
+      if (!dataByDateHour[key]) dataByDateHour[key] = [];
+      dataByDateHour[key].push(d[4]);
+    });
+
+    chart.setOption({
+      tooltip: {
+        trigger: 'item',
+        formatter: p => {
+          const date = new Date(p.data[0]).toDateString();
+          const hour = p.data[1];
+          const key = `${date}_${hour}`;
+          const viagens = dataByDateHour[key];
+          return viagens.map(d => {
+            const dateObj = new Date(d.DATA_VIAGEM);
+            const formatter = new Intl.DateTimeFormat('pt-BR',{day:'numeric', month:'long', year:'numeric'});
+            return `${d.ESTACAO_IDA} → ${d.ESTACAO_CHEGADA}, em ${formatter.format(dateObj)}<br>
+                    A viagem começou às ${d.HORARIO_SAIDA} e atrasou ${d.ATRASO} minuto${d.ATRASO===1?'':'s'}`;
+          }).join('<br><hr>');
+        }
+      },
+      grid: { left:50, right:160, bottom:80, containLabel:true },
+      xAxis: {
+        name: 'Data da viagem',
+        type: 'time',
+        axisLabel: { formatter: val => new Date(val).toLocaleDateString('pt-BR') }
+      },
+      yAxis: {
+        name: 'Horário de saída',
+        type: 'value',
+        minInterval: 1,
+        axisLabel: {
+          formatter: val => {
+            const v = Math.round(val);
+            const h = Math.floor(v / 60);
+            const m = v % 60;
+            return `${h}h${m.toString().padStart(2, '0')}m`;
+          }
+        }
+      },
+      dataZoom: [
+        { type: 'inside', xAxisIndex: 0 },
+        { type: 'inside', yAxisIndex: 0 },
+        { show: true, xAxisIndex: 0, type: 'slider'},
+        { show: true, yAxisIndex: 0, type: 'slider', right: 10, bottom: 120, top: 70 }
+      ],
+      visualMap: [{
+        type: 'continuous',
+        min: 1,
+        max: 180,
+        dimension: 2,
+        inRange: { color: ['#2b83ba', '#d73027'] },
+        outOfRange: { symbolSize: 0, opacity: 0 },
+        text: ['Atraso (min)'],
+        right: 45, top: 150,
+        calculable: true,
+      }],
+      series: [{
+        type: 'scatter',
+        symbolSize: 8,
+        data: scatterData,
+        markArea: {
+          silent: true,
+          itemStyle: { color: 'rgba(255, 230, 200, 0.3)' },
+          data: [
+            [{ yAxis: 360 }, { yAxis: 480 }],
+            [{ yAxis: 840 }, { yAxis: 960 }]
+          ]
+        }
+      }],
+    });
+  }
+
+  const titleSpan = document.getElementById('titleSpan');
+  const filtersDiv = document.getElementById('stationFilters');
+
+  titleSpan.addEventListener('click', () => { titleSpan.style.display='none'; filtersDiv.style.display='block'; });
+
+  document.getElementById('applyBtn').addEventListener('click', () => {
+    const from = document.getElementById('fromSelect').value;
+    const to = document.getElementById('toSelect').value;
+    if(from && to) titleSpan.textContent=`Viagens da estação ${from} para a estação ${to}`;
+    else if(from) titleSpan.textContent=`Viagens da estação ${from} para qualquer estação`;
+    else if(to) titleSpan.textContent=`Viagens de qualquer estação para a estação ${to}`;
+    else titleSpan.textContent='Viagens em todo o Reino Unido';
+    filtersDiv.style.display='none'; titleSpan.style.display='inline';
+    applyFilters();
+  });
+
+  function applyFilters(){
+    const from = document.getElementById('fromSelect').value;
+    const to = document.getElementById('toSelect').value;
+    let filtered = allData;
+    if(from) filtered = filtered.filter(d=>d.ESTACAO_IDA===from);
+    if(to) filtered = filtered.filter(d=>d.ESTACAO_CHEGADA===to);
+    renderScatter(filtered);
+  }
+
+  loadAndRender();
+  window.addEventListener('resize', ()=> chart.resize());
+  window.addEventListener('resize', ()=> radarChart.resize());
+
+  function getRadarColor(atraso) {
+      const atrasoMin = 1;
+      const atrasoMax = 180;
+      const t = Math.min(Math.max((atraso - atrasoMin) / (atrasoMax - atrasoMin), 0), 1);
+      return interpolateColor('#2b83ba', '#d73027', t);
+  }
+
+  function interpolateColor(c1, c2, t) {
+      const hexToRgb = h => h.match(/\w\w/g).map(x => parseInt(x,16));
+      const [r1,g1,b1] = hexToRgb(c1.slice(1));
+      const [r2,g2,b2] = hexToRgb(c2.slice(1));
+      const r = Math.round(r1 + (r2-r1)*t);
+      const g = Math.round(g1 + (g2-g1)*t);
+      const b = Math.round(b1 + (b2-b1)*t);
+      return `rgb(${r},${g},${b})`;
+  }
+
+    
+  function formatDatePtBr(dateStr) {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('pt-BR', { day:'numeric', month:'long', year:'numeric' });
+  }
+
+  function formatTimePtBr(timeStr) {
+      if (!timeStr) return '';
+      const [h,m] = timeStr.split(':').map(Number);
+      return m === 0 ? `${h}h` : `${h}h${m}m`;
+  }
+
+  function mapearMotivo(motivo) {
+      if (!motivo || motivo.trim() === '') return 'motivos desconhecidos';
+
+      const mapa = {
+          "Signal Failure": "uma falha no sinal",
+          "Staff Shortage": "falta de pessoal",
+          "Staffing": "problemas de equipe",
+          "Technical Issue": "um problema técnico",
+          "Traffic": "tráfego intenso",
+          "Weather": "condições climáticas adversas",
+          "Weather Conditions": "condições climáticas adversas"
+      };
+
+      return mapa[motivo] || "motivos desconhecidos";
+  }
+
+  let viagensNoPonto = [];
+  let currentIndex = 0;
+
+  function renderRadarForIndex(index) {
+      const d = viagensNoPonto[index];
+      overlay.style.pointerEvents = 'auto';
+      overlay.style.opacity = 1;
+
+      radarTitle.innerHTML = `Condições da viagem <span class="blueText">${index + 1}/${viagensNoPonto.length}</span> de <span class="blueText">${d.ESTACAO_IDA} → ${d.ESTACAO_CHEGADA}</span> em ${formatDatePtBr(d.DATA_VIAGEM)}`;
+      radarSubtitle.innerHTML = `A viagem começou às ${formatTimePtBr(d.HORARIO_SAIDA)} e era prevista para chegar às ${formatTimePtBr(d.HORARIO_CHEGADA)}, mas atrasou ${d.ATRASO} minuto${d.ATRASO===1?'':'s'} por ${mapearMotivo(d.MOTIVO_ATRASO)}.`;
+
+      const tempoReal = d.TEMPO + d.ATRASO;
+      const pontualidade = tempoReal > 0 ? (d.TEMPO / tempoReal) * 100 : 0;
+      console.log(d.ATRASO)
+      const color = getRadarColor(d.ATRASO);
+
+      radarChart.setOption({
+          tooltip: {
+              formatter: function(params) {
+                  const v = params.data.value;
+                  return `
+                    <b>Perfil da viagem</b> <br><br>
+                    Pontualidade: <b>${v[0]}%</b><br>
+                    Tempo de viagem: <b>${v[1]} min</b><br>
+                    Primeira classe: <b>${v[2]}%</b><br>
+                    Compras antecipadas: <b>${v[3]}%</b><br>
+                    Pedidos de reembolso: <b>${v[4]}%</b><br>
+                    Preço médio: <b>£${v[5]}</b>
+                  `;
+              }
+          },
+          radar: {
+              indicator: [
+                  { name: 'Pontualidade (%)', max: 100 },
+                  { name: 'Tempo de viagem (min)', max: 300 },
+                  { name: 'Primeira classe (%)', max: 100 },
+                  { name: 'Compras antecipadas (%)', max: 100 },
+                  { name: 'Pedidos reembolso (%)', max: 100 },
+                  { name: 'Preço médio (£)', max: 200 },
+              ]
+          },
+          series: [{
+              type: 'radar',
+              data: [{
+                  value: [
+                      Number(pontualidade.toFixed(1)),
+                      Number(tempoReal.toFixed(1)),
+                      Number(d.PCT_PRIMEIRA_CLASSE.toFixed(1)),
+                      Number(d.PCT_COMPRAS_ANTECIPADAS.toFixed(1)),
+                      Number(d.PCT_PEDIDOS_REEMBOLSO.toFixed(1)),
+                      Number(d.PRECO_MEDIO.toFixed(1)),
+                  ],
+                  name: `Viagem ${index+1} de ${viagensNoPonto.length}`,
+                  lineStyle: { color: color },
+                  itemStyle: { color: color }
+              }]
+          }]
+      });
+      document.getElementById('prevBtn').disabled = viagensNoPonto.length <= 1;
+      document.getElementById('nextBtn').disabled = viagensNoPonto.length <= 1;
+  }
+
+  document.getElementById('prevBtn').onclick = () => {
+      if(viagensNoPonto.length > 1){
+          currentIndex = (currentIndex - 1 + viagensNoPonto.length) % viagensNoPonto.length;
+          renderRadarForIndex(currentIndex);
+      }
+  };
+
+  document.getElementById('nextBtn').onclick = () => {
+      if(viagensNoPonto.length > 1){
+          currentIndex = (currentIndex + 1) % viagensNoPonto.length;
+          renderRadarForIndex(currentIndex);
+      }
+  };
+
+  chart.on('click', params => {
+      const d = params.data[4];
+      const date = new Date(d.DATA_VIAGEM).toDateString();
+      const hour = params.data[1];
+      const key = `${date}_${hour}`;
+      
+      viagensNoPonto = allData.filter(v => {
+          const vDate = new Date(v.DATA_VIAGEM).toDateString();
+          const vHour = (v.HORARIO_SAIDA || "00:00").split(':');
+          const vY = Number(vHour[0])*60 + Number(vHour[1]);
+          return vDate === date && vY === hour;
+      });
+
+      currentIndex = 0;
+      renderRadarForIndex(currentIndex);
+  });
+
+  backBtn.addEventListener('click', ()=>{
+    overlay.style.opacity=0;
+    overlay.style.pointerEvents='none';
+  });
+</script>
+
+</body></html>

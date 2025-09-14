@@ -1,0 +1,38 @@
+{
+  "Birmingham New Street": [
+    "London Euston",
+    "Manchester Piccadilly"
+  ],
+  "Edinburgh Waverley": [
+    "London Kings Cross"
+  ],
+  "Liverpool Lime Street": [
+    "London Paddington",
+    "London Euston",
+    "Manchester Piccadilly"
+  ],
+  "London Euston": [
+    "York",
+    "Birmingham New Street"
+  ],
+  "London Kings Cross": [
+    "York"
+  ],
+  "London Paddington": [
+    "Reading"
+  ],
+  "Manchester Piccadilly": [
+    "Nottingham",
+    "London Euston",
+    "Leeds",
+    "Liverpool Lime Street"
+  ],
+  "Oxford": [
+    "Bristol Temple Meads"
+  ],
+  "York": [
+    "Wakefield",
+    "Durham",
+    "Doncaster"
+  ]
+}
