@@ -233,10 +233,16 @@
       }
 
       #navButtons {
-          display: flex;
-          justify-content: center; 
-          gap: 8px; 
-          margin-bottom: 16px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      #navButtons button {
+          float: none;
+          margin: 0;
       }
     </style>
   </head>
@@ -312,10 +318,10 @@
       <div id="radarSubtitle"></div>
       <div id="radar"></div>
       <div id="navButtons">
+        <button id="backBtn">Voltar</button>
         <button id="prevBtn">Viagem anterior</button>
         <button id="nextBtn">Próxima viagem</button>
       </div>
-      <button id="backBtn">Voltar</button>
     </div>
 
     <div id="footer" style="height: 2%; margin-top: 150px">
