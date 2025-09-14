@@ -321,6 +321,10 @@ async function updateFromStations(){
 
 function renderScatter(data){
   // Preparar os dados para o scatter
+    if (!data || data.length === 0) {
+      chart.clear();
+      return;
+    }
   const scatterData = data.map(d => {
     const x = new Date(d.DATA_VIAGEM).getTime();
     const timeParts = (d.HORARIO_SAIDA || "00:00").split(':');
@@ -409,7 +413,7 @@ function renderScatter(data){
       }
     }],
   });
-}0
+}
 
 const titleSpan = document.getElementById('titleSpan');
 const filtersDiv = document.getElementById('stationFilters');
