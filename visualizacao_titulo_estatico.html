@@ -54,6 +54,10 @@
     background: rgb(117, 181, 255);
     color: white;
     }
+    option.unavailable:checked {
+      background: red;
+      color: white;
+    }
   #radar { width:100%; height:500px; transition: opacity 0.5s; margin-top: 0; }
   #applyBtn { margin-left:6px; vertical-align: middle; font-weight: 700; color: rgb(115, 115, 117); cursor: pointer; border: none; height: 40px; width: 40px; border-radius: 100%; background: #eeeeee; padding:0 10px; transition: 0.4s;}
   #applyBtn:hover{ background: #dddddd; }
@@ -184,30 +188,6 @@ async function populateStationSelects() {
   populateTos();
 }
 
-function removeToDuplicates(){
-  const toSel = document.getElementById('toSelect');
-  const seen = new Set();
-  Array.from(toSel.options).forEach(opt => {
-    if (seen.has(opt.value) && opt.value) {
-      toSel.removeChild(opt);
-    } else {
-      seen.add(opt.value);
-    }
-  });
-}
-
-function removeFromDuplicates(){
-  const fromSel = document.getElementById('fromSelect');
-  const seen = new Set();
-  Array.from(fromSel.options).forEach(opt => {
-    if (seen.has(opt.value) && opt.value) {
-      fromSel.removeChild(opt);
-    } else {
-      seen.add(opt.value);
-    }
-  });
-}
-
 async function populateFroms() {
   const fromSel = document.getElementById('fromSelect');
   let current = fromSel.value;
@@ -290,6 +270,10 @@ async function updateToStations(){
       opt.className = "unavailable";
     }
   }
+
+  if (toSel.value && !availableToStations.includes(toSel.value)) {
+    toSel.class = 'unavailable';
+  }
 }
 
 async function updateFromStations(){
@@ -313,6 +297,10 @@ async function updateFromStations(){
     } else {
       opt.className = "unavailable";
     }
+  }
+
+  if (fromSel.value && !availableFromStations.includes(fromSel.value)) {
+    fromSel.class = 'unavailable';
   }
 }
 
