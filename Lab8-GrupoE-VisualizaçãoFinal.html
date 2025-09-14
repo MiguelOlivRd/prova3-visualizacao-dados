@@ -295,7 +295,7 @@
           "><strong>Tempo de atraso na chegada das viagens por trem no Reino Unido</strong></span>
       </h2>
       <p style="text-align: justify; padding: 10px 50px 10px 50px">
-        Breve resumo sobre os dados (e as histórias) visualizadas.
+        Os dados (disponíveis em: <a href="https://mavenanalytics.io/data-playground/uk-train-rides" target="_blank">https://mavenanalytics.io/data-playground/uk-train-rides<a>) descrevem registros fictícios de viagens de trens pelo Reino Unido durante os 4 primeiros meses de 2024, disponibilizando informações diversas sobre elas, como data da viajem, duração da mesma, sua estação de saída e seu destino. A partir deles, foi realizada a visualização abaixo a fim de analisar os atrasos ocorridos nas viagens, dando destaque aos horários de pico da malha ferroviária e os pontos de saída/chegada de cada estação, visando fornecer insights valiosos para clientes que planejam utilizar esse meio de transporte e para as próprias empresas ferroviárias que podem utilizá-lo para entender problemas ocorridos em suas linhas.
       </p>
     </div>
 
@@ -331,9 +331,11 @@
         <b>Dicas para interagir com a visualização</b>:
       </p>
       <ul style="padding: 0px 50px 10px 75px;">
-      <li>Inserir aqui breves instruções para o usuário navegar na visualização e usar o máximo dos recursos de interação disponíveis.</li>
-      <li>...</li>
-      <li>...</li>
+      <li>Utilize a roda de rolagem em conjunto com o cursor do mouse ou as as barras mais externas da vizualização para aplicar zoom em áreas específicas dela;</li>
+      <li>Clique no texto acima do gráfico para selecionar o ponto de partida e/ou chegar e aperte "ok" para filtrar as informações do gráfico usando as estações escolhidas;</li>
+      <li>Utilize a barra lateral direita mais interna para filtrar as viagens pelo seu tempo de atraso;</li>
+      <li>Passe o cursor pelos pontos do gráfico para exibir mais informações sobre todas as viagens realizadas naquela data e hora;</li>
+      <li>Clique em um dos pontos exibidos no gráfico para abrir uma visualização mais detalhada sobre informações das viagens ocorridas naquela data e hora.</li>
     </ul>
     </div>
 
@@ -610,7 +612,7 @@
             const v = Math.round(val);
             const h = Math.floor(v / 60);
             const m = v % 60;
-            return m === 0 ? `${h}h` : `${h}h${m}m`;
+            return `${h}h${m.toString().padStart(2, '0')}m`;
           }
         }
       },
