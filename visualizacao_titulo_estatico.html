@@ -399,7 +399,7 @@ function renderScatter(data){
         return viagens.map(d => {
           const dateObj = new Date(d.DATA_VIAGEM);
           const formatter = new Intl.DateTimeFormat('pt-BR',{day:'numeric', month:'long', year:'numeric'});
-          return `${d.ESTACAO_IDA} -> ${d.ESTACAO_CHEGADA}, em ${formatter.format(dateObj)}<br>
+          return `${d.ESTACAO_IDA} → ${d.ESTACAO_CHEGADA}, em ${formatter.format(dateObj)}<br>
                   A viagem começou às ${d.HORARIO_SAIDA} e atrasou ${d.ATRASO} minuto${d.ATRASO===1?'':'s'}`;
         }).join('<br><hr>');
       }
@@ -541,7 +541,7 @@ function renderRadarForIndex(index) {
     overlay.style.pointerEvents = 'auto';
     overlay.style.opacity = 1;
 
-    radarTitle.innerHTML = `Condições da viagem <span class="blueText">${index + 1}/${viagensNoPonto.length}</span> de <span class="blueText">${d.ESTACAO_IDA} -> ${d.ESTACAO_CHEGADA}</span> em ${formatDatePtBr(d.DATA_VIAGEM)}`;
+    radarTitle.innerHTML = `Condições da viagem <span class="blueText">${index + 1}/${viagensNoPonto.length}</span> de <span class="blueText">${d.ESTACAO_IDA} → ${d.ESTACAO_CHEGADA}</span> em ${formatDatePtBr(d.DATA_VIAGEM)}`;
     radarSubtitle.innerHTML = `A viagem começou às ${formatTimePtBr(d.HORARIO_SAIDA)} e era prevista para chegar às ${formatTimePtBr(d.HORARIO_CHEGADA)}, mas atrasou ${d.ATRASO} minuto${d.ATRASO===1?'':'s'} por ${mapearMotivo(d.MOTIVO_ATRASO)}.`;
 
     const tempoReal = d.TEMPO + d.ATRASO;
