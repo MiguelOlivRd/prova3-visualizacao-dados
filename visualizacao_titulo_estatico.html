@@ -9,6 +9,20 @@
     #chart { width:100%; height:550px;}
     #title {margin-left: 10px; margin-top: 30px; font-weight:300; font-size:x-large; position:relative; color: rgb(115, 115, 117);}
     #stationFilters { display:none;}
+    #titleSpan {
+        cursor: pointer;
+        color: rgb(117, 181, 255);
+        border: 1px dashed rgb(117, 181, 255);
+        border-radius: 6px;
+        padding: 4px;
+        transition: all 0.3s ease;
+    }
+
+    #titleSpan:hover {
+        background-color: rgb(117, 181, 255);
+        color: white;
+        border-color: transparent;
+    }
     select {
         border: 2px solid #dddddd;
         background: #eeeeee;
@@ -305,26 +319,43 @@ async function updateFromStations(){
 }
 
 function renderScatter(data){
+  // Preparar os dados para o scatter
   const scatterData = data.map(d => {
     const x = new Date(d.DATA_VIAGEM).getTime();
-
     const timeParts = (d.HORARIO_SAIDA || "00:00").split(':');
     const y = Number(timeParts[0])*60 + Number(timeParts[1]);
-
-    return [x, y, d.ATRASO, d.PASSAGEIROS, d];
+    return [x, y, d.ATRASO, d.PASSAGEIROS, d]; // mantemos o objeto original
   });
 
-  const atrasoMax = Math.max(...data.map(d => d.ATRASO || 0));
+  // Calcular valores para o visualMap
+  const atrasos = data.map(d => d.ATRASO || 0);
+  const atrasoMax = Math.max(...atrasos);
+  const atrasoMin = Math.min(...atrasos);
+
+  // Agrupar dados por data + hora
+  const dataByDateHour = {};
+  scatterData.forEach(d => {
+    const date = new Date(d[0]).toDateString();
+    const hour = d[1];
+    const key = `${date}_${hour}`;
+    if (!dataByDateHour[key]) dataByDateHour[key] = [];
+    dataByDateHour[key].push(d[4]); // guardamos o objeto original
+  });
 
   chart.setOption({
     tooltip: {
       trigger: 'item',
       formatter: p => {
-        const d = p.data[4];
-        const dateObj = new Date(d.DATA_VIAGEM);
-        const formatter = new Intl.DateTimeFormat('pt-BR',{day:'numeric', month:'long', year:'numeric'});
-        return `${d.ESTACAO_IDA} -> ${d.ESTACAO_CHEGADA}, em ${formatter.format(dateObj)}<br>
-                A viagem começou às ${d.HORARIO_SAIDA} e atrasou ${d.ATRASO} minuto${d.ATRASO===1?'':'s'}`;
+        const date = new Date(p.data[0]).toDateString();
+        const hour = p.data[1];
+        const key = `${date}_${hour}`;
+        const viagens = dataByDateHour[key];
+        return viagens.map(d => {
+          const dateObj = new Date(d.DATA_VIAGEM);
+          const formatter = new Intl.DateTimeFormat('pt-BR',{day:'numeric', month:'long', year:'numeric'});
+          return `${d.ESTACAO_IDA} -> ${d.ESTACAO_CHEGADA}, em ${formatter.format(dateObj)}<br>
+                  A viagem começou às ${d.HORARIO_SAIDA} e atrasou ${d.ATRASO} minuto${d.ATRASO===1?'':'s'}`;
+        }).join('<br><hr>'); // separa viagens distintas
       }
     },
     grid: { left:50, right:160, bottom:80, containLabel:true },
@@ -356,9 +387,10 @@ function renderScatter(data){
       type: 'continuous',
       min: 0,
       max: atrasoMax,
-      dimension: 2, // terceira posição = ATRASO
-      inRange: { color: ['#2b83ba', '#d73027'] }, // azul = pouco atraso, vermelho = muito atraso
-      text: ['Muito atraso','Pouco atraso'],
+      dimension: 2,
+      inRange: { color: ['#2b83ba', '#d73027'] },
+      outOfRange: { symbolSize: 0, opacity: 0 },
+      text: ['Atraso (min)'],
       right: 45, top: 150,
       calculable: true,
     }],
@@ -368,23 +400,15 @@ function renderScatter(data){
       data: scatterData,
       markArea: {
         silent: true,
-        itemStyle: {
-          color: 'rgba(255, 230, 200, 0.3)'
-        },
+        itemStyle: { color: 'rgba(255, 230, 200, 0.3)' },
         data: [
-          [
-            { yAxis: 360 },
-            { yAxis: 480 } 
-          ],
-          [
-            { yAxis: 840 },
-            { yAxis: 960 }
-          ]
+          [{ yAxis: 360 }, { yAxis: 480 }],
+          [{ yAxis: 840 }, { yAxis: 960 }]
         ]
       }
-    }]
+    }],
   });
-}
+}0
 
 const titleSpan = document.getElementById('titleSpan');
 const filtersDiv = document.getElementById('stationFilters');
